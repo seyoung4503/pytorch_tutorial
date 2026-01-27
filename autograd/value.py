@@ -2,6 +2,7 @@ class Value:
     def __init__(self, data, _children=(), _op='', label=''):
         self.data = data
         self.grad = 0.0
+        self._backward = lambda: None
         self._prev = set(_children)
         self._op = _op
         self.label = label
@@ -10,28 +11,71 @@ class Value:
         return f"Value(data={self.data})"
 
     def __add__(self, other):
-        return Value(self.data + other.data, (self, other), _op='+')
+        out = Value(self.data + other.data, (self, other), _op='+')
+
+        def _backward():
+            self.grad = 1.0 * out.grad
+            other.grad = 1.0 * out.grad
+        out._backward = _backward
+        return out
     
     def __mul__(self, other):
-        return Value(self.data * other.data, (self, other), _op='*')
+        out = Value(self.data * other.data, (self, other), _op='*')
+
+        def _backward():
+            self.grad = other.data * out.grad
+            other.grad = self.data * out.grad
+        out._backward = _backward
+        return out
     
     def tanh(self):
         import math
         t = (math.exp(2 * self.data) - 1) / (math.exp(2 * self.data) + 1)
-        return Value(t, (self,), _op='tanh')
+        out = Value(t, (self,), _op='tanh')
+
+        def _backward():
+            self.grad = (1 - t ** 2) * out.grad
+        out._backward = _backward
+
+        return out
+    
+    def backward(self):
+        topo = []
+        visited = set()
+        def build_topo(v):
+            if v not in visited:
+                visited.add(v)
+                for child in v._prev:
+                    build_topo(child)
+                topo.append(v)
+        build_topo(self)
+
+        self.grad = 1.0
+        for node in reversed(topo):
+            node._backward()
+
     
     
 if __name__ == "__main__":
-    a = Value(10)
-    b = Value(20)
-    c = a + b
+    x1 = Value(2)
+    w1 = Value(-3)
 
-    c = Value(5)
-    e = a + b*c
+    x2 = Value(0)
+    w2 = Value(1)
 
-    print(e)
+    x1w1 = x1*w1
+    x2w2 = x2*w2
+
+    b = Value(6.88137)
+
+    x1w1x2w2 = x1w1 + x2w2
+
+    n = x1w1x2w2 + b
+
+    o = n.tanh()
+    o.backward()
 
     import visualize as viz
-    dot = viz.draw_dot(e)
+    dot = viz.draw_dot(o)
 
     dot.render('graphtree', view=True)
