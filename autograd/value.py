@@ -28,6 +28,15 @@ class Value:
     def __radd__(self, other):
         return self + other
     
+    def __neg__(self):
+        return self * -1
+    
+    def __sub__(self, other):
+        return self + (-other)
+    
+    def __rsub(self, other):
+        return (-other) + self
+    
     def __mul__(self, other):
         other = other if isinstance(other, Value) else other
         out = Value(self.data * other.data, (self, other), _op='*')
