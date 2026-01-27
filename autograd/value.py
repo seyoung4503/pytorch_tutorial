@@ -41,6 +41,9 @@ class Value:
     def __rmul__(self, other):
         return self * other
     
+    def __truediv__(self, other):
+        return self * other**-1
+    
 
     def exp(self):
         x = self.data
