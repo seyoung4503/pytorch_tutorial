@@ -45,6 +45,16 @@ class Value:
         return self * other**-1
     
 
+    def __pow__(self, other):
+        assert isinstance(other, (int, float)), "Only support int, float pow"
+        out = Value(self.data**other, (self,), f'**{other}')
+
+        def _backward():
+            self.grad += other * (self.data ** (other-1)) * out.grad
+        out._backward = _backward
+
+        return out
+
     def exp(self):
         x = self.data
         out = Value(math.exp(x), (self,), _op='exp')
