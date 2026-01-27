@@ -1,0 +1,19 @@
+# 가상환경 관련
+.venv/
+env/
+venv/
+anaconda-project.yaml
+.git
+
+# 파이썬 캐시
+__pycache__/
+*.py[cod]
+
+# 파이토치/데이터 관련
+*.pth
+*.pt
+data/
+outputs/
+
+# 맥 시스템 파일
+.DS_Store
