@@ -1,3 +1,8 @@
+import math
+
+
+
+
 class Value:
     def __init__(self, data, _children=(), _op='', label=''):
         self.data = data
@@ -35,6 +40,17 @@ class Value:
     
     def __rmul__(self, other):
         return self * other
+    
+
+    def exp(self):
+        x = self.data
+        out = Value(math.exp(x), (self,), _op='exp')
+
+        def _backward():
+            self.grad += out.data * out.grad
+        out._backward = _backward
+
+        return out
     
     def tanh(self):
         import math
