@@ -11,22 +11,30 @@ class Value:
         return f"Value(data={self.data})"
 
     def __add__(self, other):
+        other = other if isinstance(other, Value) else other
         out = Value(self.data + other.data, (self, other), _op='+')
 
         def _backward():
-            self.grad = 1.0 * out.grad
-            other.grad = 1.0 * out.grad
+            self.grad += 1.0 * out.grad
+            other.grad += 1.0 * out.grad
         out._backward = _backward
         return out
     
+    def __radd__(self, other):
+        return self + other
+    
     def __mul__(self, other):
+        other = other if isinstance(other, Value) else other
         out = Value(self.data * other.data, (self, other), _op='*')
 
         def _backward():
-            self.grad = other.data * out.grad
-            other.grad = self.data * out.grad
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
         out._backward = _backward
         return out
+    
+    def __rmul__(self, other):
+        return self * other
     
     def tanh(self):
         import math
@@ -34,7 +42,7 @@ class Value:
         out = Value(t, (self,), _op='tanh')
 
         def _backward():
-            self.grad = (1 - t ** 2) * out.grad
+            self.grad += (1 - t ** 2) * out.grad
         out._backward = _backward
 
         return out
