@@ -16,7 +16,7 @@ class Value:
         return f"Value(data={self.data})"
 
     def __add__(self, other):
-        other = other if isinstance(other, Value) else other
+        other = other if isinstance(other, Value) else Value(other)
         out = Value(self.data + other.data, (self, other), _op='+')
 
         def _backward():
@@ -34,11 +34,11 @@ class Value:
     def __sub__(self, other):
         return self + (-other)
     
-    def __rsub(self, other):
-        return (-other) + self
+    def __rsub__(self, other):
+        return other + (-self)
     
     def __mul__(self, other):
-        other = other if isinstance(other, Value) else other
+        other = other if isinstance(other, Value) else Value(other)
         out = Value(self.data * other.data, (self, other), _op='*')
 
         def _backward():
