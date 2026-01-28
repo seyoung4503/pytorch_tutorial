@@ -12,10 +12,19 @@ class Neuron:
         out = act.tanh()
 
         return out
-    
+
+
+class Layer:
+
+    def __init__(self, nin, nout):
+        self.neurons = [Neuron(nin) for _ in range(nout)]
+
+    def __call__(self, x):
+        outs = [n(x) for n in self.neurons]
+        return outs
 
 if __name__ == "__main__":
     x = [2.0, 3.0]
-    n = Neuron(2)
+    n = Layer(2, 3)
 
     print(n(x))
